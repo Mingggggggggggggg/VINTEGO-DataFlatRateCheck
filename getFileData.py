@@ -1,6 +1,6 @@
 import os
 import logger
-
+excludeusersDir = []
 log = []
 
 def getFileNames(userPath):
