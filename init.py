@@ -56,12 +56,12 @@ def getArgs():
     )
     parser.add_argument(
         "-S", "--setSize",
-        help="Setze Größe für Zielpfad (nur bei add/edit erlaubt)"
+        help="Setze Größe in GB für Zielpfad (nur bei add/edit erlaubt)"
     )
     parser.add_argument(
         "-wS", "--warnSizePercent",
         type=int,
-        help="Prozent von maxSize, ab der eine Meldung ausgegeben werden soll"
+        help="Prozent von maxSize, ab der eine Meldung ausgegeben werden soll. Erfordert check"
     )
     parser.add_argument(
         "-nST", "--noSkipToday",
@@ -74,20 +74,34 @@ def getArgs():
 def main():
     args = getArgs()
     log.cleanLog()
-    
+
     globalLog.append("Überprüfe Eingabekombinationen auf Korrektheit")
+    # Kombinationsprüfungen
     if args.delClient and args.setSize:
-        globalLog.append("Fehler: --setSize ist nicht mit --delClient erlaubt.")
+        globalLog.append("Fehler: --setSize darf nicht mit --delClient verwendet werden.")
         log.logMessageHeader("Global Log", globalLog, top=True)
-        sys.exit("Fehler: --setSize ist nicht mit --delClient erlaubt.")
-    if args.check and (args.zielPfad or args.setSize):
-        globalLog.append("Fehler: --check darf nicht mit Zielpfaddaten kombiniert werden.")
-        log.logMessageHeader("Global Log", globalLog, top=True)
-        sys.exit("Fehler: --check darf nicht mit Zielpfaddaten kombiniert werden.")
+        sys.exit("Fehler: --setSize darf nicht mit --delClient verwendet werden.")
+
+    if args.check:
+        # --check darf nicht mit Pfad- oder Size-Parametern kombiniert werden
+        if args.zielPfad or args.setSize:
+            globalLog.append("Fehler: --check darf nicht mit --zielPfad oder --setSize kombiniert werden.")
+            log.logMessageHeader("Global Log", globalLog, top=True)
+            sys.exit("Fehler: --check darf nicht mit --zielPfad oder --setSize kombiniert werden.")
+        # --warnSizePercent wird zwingend benötigt
+        if not args.warnSizePercent:
+            globalLog.append("Fehler: --check erfordert die Angabe von --warnSizePercent.")
+            log.logMessageHeader("Global Log", globalLog, top=True)
+            sys.exit("Fehler: --check erfordert --warnSizePercent.")
+
+    # Prüfen, dass mindestens ein Modus gewählt wurde
     if not (args.check or args.addClient or args.editClient or args.delClient):
-        globalLog.append("Fehler: Kein Modus ausgewählt. Nutze --check, --addClient, --editClient oder --delClient.")
+        globalLog.append("Fehler: Kein Modus ausgewählt. Bitte --check, --addClient, --editClient oder --delClient verwenden.")
         log.logMessageHeader("Global Log", globalLog, top=True)
-        sys.exit("Fehler: Kein Modus ausgewählt. Nutze --check, --addClient, --editClient oder --delClient.")
+        sys.exit("Fehler: Kein Modus ausgewählt.")
+
+
+
     globalLog.append("Keine Kombinationskonflikte gefunden. Starte Integritätsprüfung")
 
     print("Starte Data Integritätsprüfung")
@@ -98,7 +112,10 @@ def main():
 
     if args.check:
         globalLog.append(f"Prüfen ausgewählt. Starte Prüfungen. Größenwarnungen bei Überschreitung von {args.warnSizePercent}% werden im Log ausgegeben")
-        dM.runCheck(fullDataPath, args.warnSizePercent, args.noSkipToday)
+        try:
+            dM.runCheck(fullDataPath, args.warnSizePercent, args.noSkipToday)
+        except Exception as e:
+            print(e)
         return f"Modus: Prüfen | warnSizePercent={args.warnSizePercent}"
     elif args.addClient:
         globalLog.append(f"Hinzufügen ausgewählt. Pfad: {args.zielPfad} mit Größe: {args.setSize} werden hinzugefügt")
@@ -114,9 +131,12 @@ def main():
         return f"Modus: Zielpfad löschen | Name={args.zielPfad}"
 
     log.logMessageHeader("GlobalLog", globalLog, top=True)
-if __name__ == "__name__":
+
+if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
         print("Anwendung durch Nutzer beendet")
-        pass
+
+
+#python -m PyInstaller --onefile init.py -n VINDFR

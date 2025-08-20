@@ -49,7 +49,7 @@ def addData(fullDataPath, name, maxSize):
     
     addClient = {
         "Pfad": name,
-        "MaxSize": maxSize,
+        "MaxSize": float(maxSize),
         "LastCheck": None,
         "LastSize": None
     }
@@ -69,7 +69,7 @@ def editData(fullDataPath, name, newMaxSize):
 
     for i in data:
         if i["Pfad"] == name:
-            i["MaxSize"] = newMaxSize
+            i["MaxSize"] = float(newMaxSize)
             isEntry = True
             break
     if not isEntry:
@@ -168,7 +168,7 @@ def runCheck(fullDataPath, warnSizePercent, skipToday):
     
     saveData(fullDataPath, data)
     log.logMessageHeader("Warnung", marked)
-    
+
 '''
 if __name__ == "__main__":
     #checkDataIntegrity(f"C:\\VINTEGO-Technik\\Data\\data.json")
