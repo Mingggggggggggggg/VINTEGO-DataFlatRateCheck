@@ -1,24 +1,28 @@
 # Der Aufbau dieser Anwendung geht gegen meine Überzeugung, nur aufgabenspezifische Anwendungen zu schreiben.
 # Der "Kunde" wünscht sich jedoch diese Anwendung für mehrere Usecases zu verallgemeinern.
 import argparse
+import os
 import sys
-import logger
+import logger as log
 import dataManager as dM
 
 dataPath = f"C:\\VINTEGO-Technik\\Data"
 dataFile = "data.json"
+fullDataPath = os.path.join(dataPath, dataFile)
+
+globalLog = []
 
 def getArgs():
     parser = argparse.ArgumentParser(
-        prog="VOGC",
+        prog="VINDFR",
         description=(
-            "VINTEGO OrdnerGrößenCheck (VOGC) "
+            "VINTEGO DataFlatRate (VINDFR)"
             "Anwendung zur Ausgabe von Ordnern, die eine gegebene Maximalgröße "
             "überschritten haben. Möglichkeit zum Hinzufügen, Bearbeiten und "
-            "Entfernen von Kunden."
+            "Entfernen von Zielpfaden."
         ),
         epilog=(
-            "Kundendaten werden in einer JSON gespeichert und abgerufen. "
+            "Zielpfaddaten werden in einer JSON gespeichert und abgerufen. "
             "Ergebnisse werden als Logdatei oder in Ninja als Ergebnis ausgegeben."
         ),
         add_help=True
@@ -28,40 +32,40 @@ def getArgs():
     mode_group.add_argument(
         "-C", "--check",
         action="store_true",
-        help="Prüfe Ordnergrößen und gebe Kunden mit Überschreitungen aus"
+        help="Prüfe Ordnergrößen und gebe Zielpfade mit Überschreitungen aus"
     )
     mode_group.add_argument(
         "-aC", "--addClient",
         action="store_true",
-        help="Füge Kunden hinzu"
+        help="Füge Zielpfad hinzu"
     )
     mode_group.add_argument(
         "-eC", "--editClient",
         action="store_true",
-        help="Bearbeite Kunden"
+        help="Bearbeite Zielpfad"
     )
     mode_group.add_argument(
         "-dC", "--delClient",
         action="store_true",
-        help="Entferne Kunden"
+        help="Entferne Zielpfad"
     )
 
     parser.add_argument(
-        "-kN", "--kundenNamen",
-        help="Kundennamen"
+        "-zP", "--zielPfad",
+        help="Auswahl des Pfades, welches in der Data.json hinterlegt ist"
     )
     parser.add_argument(
         "-S", "--setSize",
-        help="Setze Größe für Kunden (nur bei add/edit erlaubt)"
+        help="Setze Größe für Zielpfad (nur bei add/edit erlaubt)"
     )
     parser.add_argument(
-        "-sP", "--sizePercentage",
+        "-wS", "--warnSizePercent",
         type=int,
         help="Prozent von maxSize, ab der eine Meldung ausgegeben werden soll"
     )
     parser.add_argument(
-        "-sT", "--skipToday",
-        action="store_true",
+        "-nST", "--noSkipToday",
+        action="store_false",
         help="Überspringe Checks für Ordner, die heute bereits durchlaufen wurden. Bei Angabe werden die Checks nicht übersrpungen."
     )
     return parser.parse_args()
@@ -69,27 +73,50 @@ def getArgs():
 
 def main():
     args = getArgs()
-
-
+    log.cleanLog()
+    
+    globalLog.append("Überprüfe Eingabekombinationen auf Korrektheit")
     if args.delClient and args.setSize:
+        globalLog.append("Fehler: --setSize ist nicht mit --delClient erlaubt.")
+        log.logMessageHeader("Global Log", globalLog, top=True)
         sys.exit("Fehler: --setSize ist nicht mit --delClient erlaubt.")
-    if args.check and (args.kundenNamen or args.setSize):
-        sys.exit("Fehler: --check darf nicht mit Kundendaten kombiniert werden.")
+    if args.check and (args.zielPfad or args.setSize):
+        globalLog.append("Fehler: --check darf nicht mit Zielpfaddaten kombiniert werden.")
+        log.logMessageHeader("Global Log", globalLog, top=True)
+        sys.exit("Fehler: --check darf nicht mit Zielpfaddaten kombiniert werden.")
     if not (args.check or args.addClient or args.editClient or args.delClient):
+        globalLog.append("Fehler: Kein Modus ausgewählt. Nutze --check, --addClient, --editClient oder --delClient.")
+        log.logMessageHeader("Global Log", globalLog, top=True)
         sys.exit("Fehler: Kein Modus ausgewählt. Nutze --check, --addClient, --editClient oder --delClient.")
+    globalLog.append("Keine Kombinationskonflikte gefunden. Starte Integritätsprüfung")
 
-    dM.checkDataIntegrity(dataPath, dataFile)
+    print("Starte Data Integritätsprüfung")
+    if not (dM.checkDataIntegrity(fullDataPath)):
+        globalLog.append("Data Integritätsprüfung fehlgeschlagen. Bitte Logeintrag überprüfen")
+        log.logMessageHeader("Global Log", globalLog, top=True)
+        sys.exit("Data Integritätsprüfung fehlgeschlagen. Bitte Logeintrag überprüfen")
 
     if args.check:
-        dM.runCheck()
-        return f"Modus: Prüfen | sizePercentage={args.sizePercentage}"
+        globalLog.append(f"Prüfen ausgewählt. Starte Prüfungen. Größenwarnungen bei Überschreitung von {args.warnSizePercent}% werden im Log ausgegeben")
+        dM.runCheck(fullDataPath, args.warnSizePercent, args.noSkipToday)
+        return f"Modus: Prüfen | warnSizePercent={args.warnSizePercent}"
     elif args.addClient:
-        dM.addData(args.kundenNamen, args.setSize)
-        return f"Modus: Kunde hinzufügen | Name={args.kundenNamen} | Size={args.setSize}"
+        globalLog.append(f"Hinzufügen ausgewählt. Pfad: {args.zielPfad} mit Größe: {args.setSize} werden hinzugefügt")
+        dM.addData(fullDataPath, args.zielPfad, args.setSize)
+        return f"Modus: Zielpfad hinzufügen | Name={args.zielPfad} | Size={args.setSize}"
     elif args.editClient:
-        dM.editData(args.kundenNamen, args.setSize)
-        return f"Modus: Kunde bearbeiten | Name={args.kundenNamen} | Size={args.setSize}"
+        globalLog.append(f"Bearbeitung ausgewählt. {args.zielPfad} wird mit MaxSize: {args.setSize} der Liste hinzugefügt")
+        dM.editData(fullDataPath, args.zielPfad, args.setSize)
+        return f"Modus: Zielpfad bearbeiten | Name={args.zielPfad} | Size={args.setSize}"
     elif args.delClient:
-        dM.delData(args.kundenNamen)
-        return f"Modus: Kunde löschen | Name={args.kundenNamen}"
+        globalLog.append(f"Löschen ausgewählt. {args.zielPfad} und die dazu korrespondierende Einträge werden entfernt")
+        dM.delData(fullDataPath, args.zielPfad)
+        return f"Modus: Zielpfad löschen | Name={args.zielPfad}"
 
+    log.logMessageHeader("GlobalLog", globalLog, top=True)
+if __name__ == "__name__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("Anwendung durch Nutzer beendet")
+        pass

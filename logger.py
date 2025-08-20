@@ -1,17 +1,21 @@
 import os
 from datetime import datetime
+fullPath=r"C:\VINTEGO-Technik\Logs\VindfrLog.txt"
+def cleanLog():
+    os.makedirs(os.path.dirname(fullPath), exist_ok=True)
+    
+    with open(fullPath, "w", encoding="utf-8") as file:
+        file.write("")
 
-def logMessages(name, data, folderPath=r"C:\VINTEGO-Technik\Logs", fileName="profileCleanerLog.txt", top=False):
-    os.makedirs(folderPath, exist_ok=True)
-    fullPath = os.path.join(folderPath, fileName)
+def logMessageHeader(name, data, top=False):
+    os.makedirs(os.path.dirname(fullPath), exist_ok=True)
 
     puffer = len(name)
     dashes = (50 - puffer) // 2
 
     header = "-" * dashes + f" {name} " + "-" * dashes + "\n"
-    footer = "-" * (dashes - 3) + f" End{name} " + "-" * (dashes - 3) + "\n"
+    footer = "-" * (dashes - 3) + f" End{name} " + "-" * (dashes - 3)
 
-    # Erstelle den Textblock für den Log-Eintrag
     dataBlock = header
     for entry in data:
         timestamp = datetime.now().strftime("%d.%m.%Y %H:%M:%S.%f")[:-3]
@@ -30,3 +34,17 @@ def logMessages(name, data, folderPath=r"C:\VINTEGO-Technik\Logs", fileName="pro
     else:
         with open(fullPath, "a", encoding="utf-8") as file:
             file.write(dataBlock)
+
+def logMessage(data):
+    os.makedirs(os.path.dirname(fullPath), exist_ok=True)
+    # Force List
+    if isinstance(data, str):
+        data = [data]
+
+    dataBlock : str = ""
+    for entry in data:
+        timestamp = datetime.now().strftime("%d.%m.%Y %H:%M:%S.%f")[:-3]
+        dataBlock += f"{timestamp} - {entry}\n"
+
+    with open(fullPath, "a", encoding="utf-8") as file:
+        file.write(dataBlock)
