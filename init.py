@@ -67,7 +67,7 @@ def getArgs():
     )
     parser.add_argument(
         "-wS", "--warnSizePercent",
-        type=int,
+        type=float,
         help="Prozent von maxSize, ab der eine Meldung ausgegeben werden soll. " \
         "(Erfordert check)"
     )
