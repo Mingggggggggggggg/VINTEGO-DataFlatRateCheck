@@ -5,15 +5,27 @@ import time
 import logger as log
 
 def getDirSize(path):
+    if not os.path.exists(path):
+        msg = f"Der Pfad {path} existiert nicht."
+        print(msg)
+        log.logMessage(msg)
+        return 0
+
     total_size = 0
     for dirpath, dirnames, filenames in os.walk(path):
         for f in filenames:
             fp = os.path.join(dirpath, f)
-            if os.path.isfile(fp):
-                total_size += os.path.getsize(fp)
+            try:
+                if os.path.isfile(fp):
+                    total_size += os.path.getsize(fp)
+            except (FileNotFoundError, PermissionError) as e:
+                msg = f"{fp} konnte nicht gelesen werden: {e}"
+                print(msg)
+                log.logMessage(msg)
 
     size_in_gb = total_size / (1024 ** 3)
-    return round(size_in_gb, 3)  
+    return round(size_in_gb, 3)
+
 
 def createData(fullDataPath):
     os.makedirs(os.path.dirname(fullDataPath), exist_ok=True)
