@@ -32,41 +32,50 @@ def getArgs():
     mode_group.add_argument(
         "-C", "--check",
         action="store_true",
-        help="Prüfe Ordnergrößen und gebe Zielpfade mit Überschreitungen aus"
+        help="Prüfe Ordnergrößen und gebe Zielpfade mit Überschreitungen aus. " \
+        "(Erfordert warnSizePercent. Optional noSkipToday)"
     )
     mode_group.add_argument(
         "-aC", "--addClient",
         action="store_true",
-        help="Füge Zielpfad hinzu"
+        help="Füge Zielpfad und maximale Größe in GB hinzu. " \
+        "(Erfordert Zielpfad und setSize)"
     )
     mode_group.add_argument(
         "-eC", "--editClient",
         action="store_true",
-        help="Bearbeite Zielpfad"
+        help="Bearbeite Zielpfad um eine neue maximalgröße in GB" \
+        "(Erfordert Zielpfad und setSize)"
+
     )
     mode_group.add_argument(
         "-dC", "--delClient",
         action="store_true",
-        help="Entferne Zielpfad"
+        help="Entferne Zielpfad und koresspondierende Einträge" \
+        "(Erfordert Zielpfad)"
     )
 
     parser.add_argument(
         "-zP", "--zielPfad",
-        help="Auswahl des Pfades, welches in der Data.json hinterlegt ist"
+        help="Auswahl oder Nennung des Pfades, welches in der Data.json hinterlegt ist/wird. " \
+        "(Nur bei Hinzufügen, Bearbeiten und Entfernen)"
     )
     parser.add_argument(
         "-S", "--setSize",
-        help="Setze Größe in GB für Zielpfad (nur bei add/edit erlaubt)"
+        help="Setze Größe in GB für Zielpfad " \
+        "(Nur bei Hinzufügen und Bearbeiten)"
     )
     parser.add_argument(
         "-wS", "--warnSizePercent",
         type=int,
-        help="Prozent von maxSize, ab der eine Meldung ausgegeben werden soll. Erfordert check"
+        help="Prozent von maxSize, ab der eine Meldung ausgegeben werden soll. " \
+        "(Erfordert check)"
     )
     parser.add_argument(
         "-nST", "--noSkipToday",
         action="store_false",
-        help="Überspringe Checks für Ordner, die heute bereits durchlaufen wurden. Bei Angabe werden die Checks nicht übersrpungen."
+        help="Überspringe Checks für Ordner, die heute bereits durchlaufen wurden. Bei Angabe werden die Checks nicht übersrpungen." \
+        "(Optional bei Check)"
     )
     return parser.parse_args()
 
@@ -88,13 +97,13 @@ def main():
             globalLog.append("Fehler: --check darf nicht mit --zielPfad oder --setSize kombiniert werden.")
             log.logMessageHeader("Global Log", globalLog, top=True)
             sys.exit("Fehler: --check darf nicht mit --zielPfad oder --setSize kombiniert werden.")
-        # --warnSizePercent wird zwingend benötigt
+        # --warnSizePercent ist erforderlich
         if not args.warnSizePercent:
             globalLog.append("Fehler: --check erfordert die Angabe von --warnSizePercent.")
             log.logMessageHeader("Global Log", globalLog, top=True)
             sys.exit("Fehler: --check erfordert --warnSizePercent.")
 
-    # Prüfen, dass mindestens ein Modus gewählt wurde
+    # Prüfe, dass mindestens ein Modus gewählt wurde
     if not (args.check or args.addClient or args.editClient or args.delClient):
         globalLog.append("Fehler: Kein Modus ausgewählt. Bitte --check, --addClient, --editClient oder --delClient verwenden.")
         log.logMessageHeader("Global Log", globalLog, top=True)
