@@ -14,7 +14,7 @@ def logMessageHeader(name, data, top=False):
     dashes = (50 - puffer) // 2
 
     header = "-" * dashes + f" {name} " + "-" * dashes + "\n"
-    footer = "-" * (dashes - 3) + f" End{name} " + "-" * (dashes - 3)
+    footer = "-" * (dashes - 3) + f" End{name} " + "-" * (dashes - 3) + "\n"
 
     dataBlock = header
     for entry in data:
