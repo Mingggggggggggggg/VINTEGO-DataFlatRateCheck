@@ -187,8 +187,8 @@ def runCheck(fullDataPath, warnSizePercent, skipToday):
 
     for i in data:
         if ((i["LastCheck"] == currentDate) and skipToday):
-            print(f"Eintrag {i['Pfad']} wird uebersprungen, weil er heute bereits geprüft wurde")
-            logR.logMessage(f"Eintrag {i['Pfad']} wird uebersprungen, weil er heute bereits geprüft wurde")
+            print(f"Berechnung fuer {i['Pfad']} wird uebersprungen, weil dieser heute bereits geprueft wurde")
+            logR.logMessage(f"Berechnung fuer {i['Pfad']} wird uebersprungen, weil dieser heute bereits geprueft wurde")
             continue
 
         print(f"Groesse fuer {i['Pfad']} wird berechnet")
