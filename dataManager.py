@@ -57,7 +57,7 @@ def addData(fullDataPath, name, maxSize):
     except FileNotFoundError:
         name = clearInput(name)
         addClient = {
-            "Pfad": name,
+            'Pfad': name,
             "MaxSize": float(maxSize),
             "LastCheck": None,
             "LastSize": None
@@ -70,13 +70,13 @@ def addData(fullDataPath, name, maxSize):
     name = clearInput(name)
 
     for i in data:
-        if i["Pfad"] == name:
+        if i['Pfad'] == name:
             print(f"Der Pfad {name} existiert bereits in der JSON")
             logC.logMessage(f"Der Pfad {name} existiert bereits in der JSON")
             return
     
     addClient = {
-        "Pfad": name,
+        'Pfad': name,
         "MaxSize": float(maxSize),
         "LastCheck": None,
         "LastSize": None
@@ -107,7 +107,7 @@ def editData(fullDataPath, name, newMaxSize):
     isEntry = False
 
     for i in data:
-        if i["Pfad"] == name:
+        if i['Pfad'] == name:
             i["MaxSize"] = float(newMaxSize)
             isEntry = True
             break
@@ -124,7 +124,7 @@ def delData(fullDataPath, name):
     data = loadData(fullDataPath)
 
     for i in data:
-        if i["Pfad"] == name:
+        if i['Pfad'] == name:
             #i.pop(name, None)
             data.remove(i)
             break
@@ -149,11 +149,11 @@ def checkDataIntegrity(fullDataPath):
                     return False
 
                 # Pruefe auf Duplikate (Sehr teuer)
-                if k["Pfad"] in seen:
-                    print(f"Fehler: Duplikat bei Pfad {k["Pfad"]}")
-                    logR.logMessage(f"Fehler: Duplikat bei Pfad {k["Pfad"]}")
+                if k['Pfad'] in seen:
+                    print(f"Fehler: Duplikat bei Pfad {k['Pfad']}")
+                    logR.logMessage(f"Fehler: Duplikat bei Pfad {k['Pfad']}")
                     return False
-                seen.add(k["Pfad"])
+                seen.add(k['Pfad'])
                 
                 #Ergaenze optionale Ergebnisfelder LastCheck und LastSize
                 if "LastCheck" not in k:
@@ -187,11 +187,13 @@ def runCheck(fullDataPath, warnSizePercent, skipToday):
 
     for i in data:
         if ((i["LastCheck"] == currentDate) and skipToday):
+            print(f"Eintrag {i['Pfad']} wird uebersprungen, weil er heute bereits geprüft wurde")
+            logR.logMessage(f"Eintrag {i['Pfad']} wird uebersprungen, weil er heute bereits geprüft wurde")
             continue
 
         print(f"Groesse fuer {i['Pfad']} wird berechnet")
         logR.logMessage(f"Groesse fuer {i['Pfad']} wird berechnet")
-        newSize = getDirSize(i["Pfad"])
+        newSize = getDirSize(i['Pfad'])
 
         # Aktualisiere Eintrag
         i["LastCheck"] = currentDate
