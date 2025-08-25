@@ -3,7 +3,6 @@ from datetime import datetime
 fullPath=r"C:\VINTEGO-Technik\Logs\VINDFR_Changelog.txt"
 def cleanLog():
     os.makedirs(os.path.dirname(fullPath), exist_ok=True)
-    
     with open(fullPath, "w", encoding="utf-8") as file:
         file.write("")
 

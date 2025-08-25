@@ -84,7 +84,7 @@ def main():
     args = getArgs()
     logR.cleanLog()
 
-    globalLog.append("ueberpruefe Eingabekombinationen auf Korrektheit")
+    globalLog.append("Ueberpruefe Eingabekombinationen auf Korrektheit")
     # Kombinationspruefungen
     if args.delClient and args.setSize:
         globalLog.append("Fehler: --setSize darf nicht mit --delClient verwendet werden.")
@@ -126,21 +126,25 @@ def main():
             dM.runCheck(fullDataPath, args.warnSizePercent, args.noSkipToday)
         except Exception as e:
             print(e)
+        logR.logMessageHeader("GlobalLog", globalLog, top=True)
         return f"Modus: Pruefen | warnSizePercent={args.warnSizePercent}"
     elif args.addClient:
         globalLog.append(f"Hinzufuegen ausgewaehlt. Pfad: {args.zielPfad} mit Groesse: {args.setSize} werden hinzugefuegt")
         dM.addData(fullDataPath, args.zielPfad, args.setSize)
+        logR.logMessageHeader("GlobalLog", globalLog, top=True)
         return f"Modus: Zielpfad hinzufuegen | Name={args.zielPfad} | Size={args.setSize}"
     elif args.editClient:
         globalLog.append(f"Bearbeitung ausgewaehlt. {args.zielPfad} wird mit MaxSize: {args.setSize} der Liste hinzugefuegt")
         dM.editData(fullDataPath, args.zielPfad, args.setSize)
+        logR.logMessageHeader("GlobalLog", globalLog, top=True)
         return f"Modus: Zielpfad bearbeiten | Name={args.zielPfad} | Size={args.setSize}"
     elif args.delClient:
         globalLog.append(f"Loeschen ausgewaehlt. {args.zielPfad} und die dazu korrespondierende Eintraege werden entfernt")
         dM.delData(fullDataPath, args.zielPfad)
+        logR.logMessageHeader("GlobalLog", globalLog, top=True)
         return f"Modus: Zielpfad loeschen | Name={args.zielPfad}"
 
-    logR.logMessageHeader("GlobalLog", globalLog, top=True)
+
 
 if __name__ == "__main__":
     try:
