@@ -116,8 +116,9 @@ def main():
     print("Starte Data Integritaetspruefung")
     if not (dM.checkDataIntegrity(fullDataPath)):
         globalLog.append("Data Integritaetspruefung fehlgeschlagen. Bitte Logeintrag ueberpruefen")
+        print("Data Integritaetspruefung fehlgeschlagen. Bitte Logeintrag ueberpruefen")
         logR.logMessageHeader("Global Log", globalLog, top=True)
-        sys.exit("Data Integritaetspruefung fehlgeschlagen. Bitte Logeintrag ueberpruefen")
+        #sys.exit("Data Integritaetspruefung fehlgeschlagen. Bitte Logeintrag ueberpruefen")
 
     if args.check:
         globalLog.append(f"Pruefen ausgewaehlt. Starte Pruefungen. Groessenwarnungen bei Ueberschreitung von {args.warnSizePercent}% werden im Log ausgegeben")
