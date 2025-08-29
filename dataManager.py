@@ -20,10 +20,11 @@ def getDirSize(path):
                 if os.path.isfile(fp):
                     total_size += os.path.getsize(fp)
             except (FileNotFoundError, PermissionError) as e:
-                msg = f"{fp} konnte nicht gelesen werden: {e}"
-                print(msg)
-                logC.logMessage(msg)
-
+                print(f"{fp} konnte nicht gelesen werden: {e}")
+                logC.logMessage(f"{fp} konnte nicht gelesen werden: {e}")
+            except Exception as ex:
+                print(f"Sonstige Fehler bei der Berechnung der Ordnergroesse: {ex}")
+                logC.logMessage(f"Sonstige Fehler bei der Berechnung der Ordnergroesse: {ex}")
     size_in_gb = total_size / (1024 ** 3)
     return round(size_in_gb, 3)
 
@@ -92,14 +93,13 @@ def clearInput(name):
     if not name:
         return ""
 
-        # Normale Pfad-Schreibweise (z.B. \\ statt /, je nach OS)
+    name = name.strip()
     normalized = os.path.normpath(name)
 
-    # JSON-sicher: Backslashes doppeln
-    safe_path = normalized.replace("\\", "\\\\")
 
-    return safe_path
+    cleanPath = normalized.replace("\\", "\\\\")
 
+    return cleanPath
 
 def editData(fullDataPath, name, newMaxSize):
     data = loadData(fullDataPath)
